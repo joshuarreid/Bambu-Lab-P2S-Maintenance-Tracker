@@ -1,3 +1,4 @@
+import type { MaintenanceHistoryRecord } from '../api/client';
 import type { CreateMaintenanceRecordInput } from '../api/client';
 
 export type MaintenanceCategory = CreateMaintenanceRecordInput['category'];
@@ -11,6 +12,7 @@ export interface MaintenanceIntervalGroup {
 export interface UpcomingMaintenanceGroup {
   nextDueHours: number;
   hoursAway: number;
+  overdue: boolean;
   jobNames: string[];
 }
 
@@ -96,31 +98,44 @@ export const MAINTENANCE_INTERVAL_GROUPS: MaintenanceIntervalGroup[] = [
 ];
 
 /**
- * Returns the next `maxGroups` upcoming maintenance groups sorted by when
- * they are due (ascending). Groups with the same nextDue hour are treated as
- * separate entries — don't merge them, their intervals are coincidentally aligned.
+ * Returns upcoming and overdue maintenance groups.
  *
- * If any group beyond the first has more than `largeGroupThreshold` jobs, all
- * jobs in that group are still returned (no truncation).
+ * For each interval group, the last matching history record determines when
+ * that group was last serviced. If no record exists, lastDoneAt = 0.
+ * Groups where nextDueHours <= currentHours are overdue.
+ *
+ * Overdue groups are shown first (most overdue first), followed by the next
+ * `maxUpcoming` upcoming groups (soonest first).
  */
 export function getUpcomingMaintenanceGroups(
   currentHours: number,
-  maxGroups = 3,
+  history: MaintenanceHistoryRecord[],
+  maxUpcoming = 3,
 ): UpcomingMaintenanceGroup[] {
-  const withNextDue = MAINTENANCE_INTERVAL_GROUPS.map((group) => {
-    const nextDueHours =
-      Math.floor(currentHours / group.intervalHours) * group.intervalHours +
-      group.intervalHours;
+  const groups = MAINTENANCE_INTERVAL_GROUPS.map((group) => {
+    // Find the most recent record for any job in this group.
+    const lastRecord = history.find((r) => group.jobNames.includes(r.maintenanceJobName));
+    const lastDoneAt = lastRecord?.printerHours ?? 0;
+    const nextDueHours = lastDoneAt + group.intervalHours;
+    const rawAway = nextDueHours - currentHours;
     return {
       nextDueHours,
-      hoursAway: Math.max(0, nextDueHours - currentHours),
+      hoursAway: Math.abs(rawAway),
+      overdue: rawAway <= 0,
       jobNames: group.jobNames,
     };
   });
 
-  withNextDue.sort((a, b) => a.nextDueHours - b.nextDueHours || a.hoursAway - b.hoursAway);
+  const overdue = groups
+    .filter((g) => g.overdue)
+    .sort((a, b) => b.hoursAway - a.hoursAway); // most overdue first
 
-  return withNextDue.slice(0, maxGroups);
+  const upcoming = groups
+    .filter((g) => !g.overdue)
+    .sort((a, b) => a.hoursAway - b.hoursAway) // soonest first
+    .slice(0, maxUpcoming);
+
+  return [...overdue, ...upcoming];
 }
 
 export function getDefaultCategoryForJob(jobName: string): MaintenanceCategory | null {

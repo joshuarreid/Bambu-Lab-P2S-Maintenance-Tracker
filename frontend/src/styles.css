@@ -1048,6 +1048,12 @@ textarea {
   background: rgba(177, 55, 45, 0.10);
 }
 
+.upcoming-widget__hours-away--overdue {
+  color: #ffffff;
+  background: #b1372d;
+  font-weight: 700;
+}
+
 .upcoming-widget__jobs {
   list-style: none;
   margin: 0;

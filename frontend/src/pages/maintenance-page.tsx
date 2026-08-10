@@ -35,6 +35,7 @@ export function MaintenancePage() {
         <>
           <UpcomingMaintenanceWidget
             currentHours={historyQuery.latestRecord?.printerHours ?? null}
+            history={historyQuery.data ?? []}
             onJobClick={setQuickLogJobName}
           />
           <MaintenanceForm
