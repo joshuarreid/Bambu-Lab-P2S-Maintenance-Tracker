@@ -13,15 +13,22 @@ export function QuickLogSheet({ job, latestPrinterHours, onClose }: QuickLogShee
   const createMutation = useCreateMaintenanceRecord();
   const [hoursInput, setHoursInput] = useState(String(latestPrinterHours ?? 0));
   const [hoursError, setHoursError] = useState('');
+  const [isHistorical, setIsHistorical] = useState(false);
   const [category, setCategory] = useState<MaintenanceCategory>(
     getDefaultCategoryForJob(job.name) ?? 'ROUTINE',
   );
   const [notes, setNotes] = useState('');
 
+  const minHours = isHistorical ? 0 : (latestPrinterHours ?? 0);
+
   async function handleSubmit() {
     const parsedHours = parseFloat(hoursInput);
-    if (Number.isNaN(parsedHours) || parsedHours < 0) {
-      setHoursError('Enter a valid number of hours (0 or more).');
+    if (Number.isNaN(parsedHours) || parsedHours < minHours) {
+      setHoursError(
+        isHistorical
+          ? 'Enter a valid number of hours (0 or more).'
+          : `Hours must be at least ${minHours} (current total).`,
+      );
       return;
     }
     setHoursError('');
@@ -70,6 +77,20 @@ export function QuickLogSheet({ job, latestPrinterHours, onClose }: QuickLogShee
             {hoursError ? (
               <p className="maintenance-form__error" role="alert">{hoursError}</p>
             ) : null}
+            <label className="maintenance-form__historical-toggle">
+              Historical entry — logging a past record
+              <input
+                type="checkbox"
+                checked={isHistorical}
+                onChange={(e) => {
+                  setIsHistorical(e.target.checked);
+                  setHoursError('');
+                  if (!e.target.checked) {
+                    setHoursInput(String(latestPrinterHours ?? 0));
+                  }
+                }}
+              />
+            </label>
           </div>
 
           <fieldset className="edit-sheet__field">

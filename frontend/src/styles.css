@@ -44,6 +44,13 @@ textarea {
   font: inherit;
 }
 
+/* Prevent long-press callout / drag on interactive elements */
+a,
+button {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -1435,6 +1442,10 @@ textarea {
   border: 1px solid rgba(17, 17, 17, 0.08);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(12px);
+  /* Promote to GPU layer to prevent iOS scroll-bounce repositioning */
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .bottom-nav__item {
@@ -1474,6 +1485,10 @@ textarea {
 .bottom-nav__item--active,
 .bottom-nav__item--active:hover {
   color: #0a9f4b;
+  /* No transform animation when tapping the already-active tab */
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 @media (min-width: 640px) {
