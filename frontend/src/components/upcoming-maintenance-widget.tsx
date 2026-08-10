@@ -2,6 +2,7 @@ import { getUpcomingMaintenanceGroups } from '../lib/maintenance-job-metadata';
 
 interface UpcomingMaintenanceWidgetProps {
   currentHours: number | null;
+  onJobClick: (name: string) => void;
 }
 
 function urgencyClass(hoursAway: number): string {
@@ -10,7 +11,7 @@ function urgencyClass(hoursAway: number): string {
   return 'upcoming-widget__hours-away--ok';
 }
 
-export function UpcomingMaintenanceWidget({ currentHours }: UpcomingMaintenanceWidgetProps) {
+export function UpcomingMaintenanceWidget({ currentHours, onJobClick }: UpcomingMaintenanceWidgetProps) {
   const hours = currentHours ?? 0;
   const groups = getUpcomingMaintenanceGroups(hours, 3);
 
@@ -28,7 +29,15 @@ export function UpcomingMaintenanceWidget({ currentHours }: UpcomingMaintenanceW
             </div>
             <ul className="upcoming-widget__jobs">
               {group.jobNames.map((name) => (
-                <li key={name}>{name}</li>
+                <li key={name}>
+                  <button
+                    type="button"
+                    className="upcoming-widget__job-btn"
+                    onClick={() => onJobClick(name)}
+                  >
+                    {name}
+                  </button>
+                </li>
               ))}
             </ul>
           </li>

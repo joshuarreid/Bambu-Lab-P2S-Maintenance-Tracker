@@ -213,7 +213,11 @@ export function HistoryPage() {
               </thead>
               <tbody>
                 {records.map((record) => (
-                  <tr key={record.id} className="history-table__row">
+                  <tr
+                    key={record.id}
+                    className="history-table__row"
+                    onClick={() => setEditing(record)}
+                  >
                     <td className="history-table__cell history-table__cell--date">
                       {formatDate(record.createdAt)}
                     </td>

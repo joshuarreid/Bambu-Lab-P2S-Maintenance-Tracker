@@ -511,6 +511,7 @@ textarea {
 .history-table__row {
   border-bottom: 1px solid rgba(17, 17, 17, 0.06);
   transition: background-color 120ms ease;
+  cursor: pointer;
 }
 
 .history-table__row:last-child {
@@ -1091,6 +1092,27 @@ textarea {
   color: #aaaaaa;
 }
 
+.upcoming-widget__job-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: rgba(17, 17, 17, 0.2);
+  text-underline-offset: 2px;
+  transition: color 120ms ease, text-decoration-color 120ms ease;
+}
+
+.upcoming-widget__job-btn:hover {
+  color: #0a9f4b;
+  text-decoration-color: rgba(10, 159, 75, 0.5);
+}
+
 .upcoming-widget__no-history {
   margin: 10px 0 0;
   font-size: 0.83rem;
@@ -1397,7 +1419,8 @@ textarea {
   color: #1f1f1f;
 }
 
-.bottom-nav__item--active {
+.bottom-nav__item--active,
+.bottom-nav__item--active:hover {
   color: #0a9f4b;
 }
 
