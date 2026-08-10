@@ -33,8 +33,12 @@ export function createApp(dependencies: AppDependencies) {
       decorateReply: false,
     });
 
-    // Fall back to index.html for all non-API routes (client-side routing).
-    app.setNotFoundHandler((_request, reply) => {
+    // Fall back to index.html for non-API routes (client-side routing).
+    app.setNotFoundHandler((request, reply) => {
+      if (request.url.startsWith('/api') || request.url.startsWith('/health')) {
+        reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Route not found' } });
+        return;
+      }
       reply.sendFile('index.html', frontendDist);
     });
   }
