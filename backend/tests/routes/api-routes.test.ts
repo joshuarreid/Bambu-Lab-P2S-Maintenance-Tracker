@@ -183,12 +183,12 @@ test('GET /api/auth/session reports an unauthenticated session by default', asyn
   });
 });
 
-test('GET / returns ok without database access', async () => {
+test('GET /health returns ok without database access', async () => {
   const app = createTestApp();
 
   const response = await app.inject({
     method: 'GET',
-    url: '/',
+    url: '/health',
   });
 
   assert.equal(response.statusCode, 200);
