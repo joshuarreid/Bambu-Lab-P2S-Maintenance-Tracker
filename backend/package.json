@@ -1,0 +1,21 @@
+{
+  "name": "@bambu-p2s-maintanence-tracker/backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc --project tsconfig.json",
+    "test": "npm run typecheck && tsx --test tests/**/*.test.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "mysql2": "^3.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "tsx": "^4.19.1"
+  }
+}
