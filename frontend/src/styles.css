@@ -52,6 +52,8 @@ textarea {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  height: 100vh;
+  height: 100svh; /* small viewport height: excludes browser chrome on mobile */
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
@@ -148,7 +150,8 @@ textarea {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .page {
@@ -783,7 +786,6 @@ textarea {
   padding: 0;
   flex: 1;
   min-height: 0;
-  height: 0; /* forces flex child to not grow beyond parent */
   overflow: hidden;
 }
 

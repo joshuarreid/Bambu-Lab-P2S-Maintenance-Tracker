@@ -22,15 +22,24 @@ export function createApp(dependencies: AppDependencies) {
   registerRoutes(app, dependencies);
 
   // Serve the compiled frontend in production.
-  // The frontend dist is built to frontend/dist relative to the repo root,
-  // which sits two directories up from backend/dist/server.js at runtime.
+  // Path is resolved relative to this file's location:
+  // backend/dist/server.js → ../../frontend/dist = frontend/dist at repo root.
+  // Also try the sibling pattern used by DO App Platform (/workspace layout).
   if (process.env.NODE_ENV === 'production') {
-    const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+    const candidates = [
+      path.resolve(__dirname, '../../frontend/dist'),   // local / Docker
+      path.resolve(__dirname, '../../../frontend/dist'), // alternate nesting
+      path.resolve(process.cwd(), 'frontend/dist'),      // cwd-relative fallback
+    ];
+
+    const fs = await import('node:fs');
+    const frontendDist = candidates.find((p) => fs.existsSync(p)) ?? candidates[0];
+
+    app.log.info(`Serving frontend from: ${frontendDist}`);
 
     app.register(fastifyStatic, {
       root: frontendDist,
       prefix: '/',
-      decorateReply: false,
     });
 
     // Fall back to index.html for non-API routes (client-side routing).
