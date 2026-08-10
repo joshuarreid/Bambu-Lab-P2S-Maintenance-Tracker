@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
@@ -32,7 +33,6 @@ export function createApp(dependencies: AppDependencies) {
       path.resolve(process.cwd(), 'frontend/dist'),      // cwd-relative fallback
     ];
 
-    const fs = await import('node:fs');
     const frontendDist = candidates.find((p) => fs.existsSync(p)) ?? candidates[0];
 
     app.log.info(`Serving frontend from: ${frontendDist}`);
