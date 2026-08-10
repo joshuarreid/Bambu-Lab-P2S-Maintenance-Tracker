@@ -11,15 +11,22 @@ interface QuickLogSheetProps {
 
 export function QuickLogSheet({ job, latestPrinterHours, onClose }: QuickLogSheetProps) {
   const createMutation = useCreateMaintenanceRecord();
-  const [printerHours, setPrinterHours] = useState(latestPrinterHours ?? 0);
+  const [hoursInput, setHoursInput] = useState(String(latestPrinterHours ?? 0));
+  const [hoursError, setHoursError] = useState('');
   const [category, setCategory] = useState<MaintenanceCategory>(
     getDefaultCategoryForJob(job.name) ?? 'ROUTINE',
   );
   const [notes, setNotes] = useState('');
 
   async function handleSubmit() {
+    const parsedHours = parseFloat(hoursInput);
+    if (Number.isNaN(parsedHours) || parsedHours < 0) {
+      setHoursError('Enter a valid number of hours (0 or more).');
+      return;
+    }
+    setHoursError('');
     await createMutation.mutateAsync({
-      printerHours,
+      printerHours: parsedHours,
       maintenanceJobId: job.id,
       category,
       notes: notes.trim() || null,
@@ -54,13 +61,15 @@ export function QuickLogSheet({ job, latestPrinterHours, onClose }: QuickLogShee
               className="edit-sheet__input"
               id="quick-log-hours"
               type="number"
-              inputMode="numeric"
-              min={latestPrinterHours ?? 0}
-              max={9999}
+              inputMode="decimal"
+              min={0}
               step={0.1}
-              value={printerHours}
-              onChange={(e) => setPrinterHours(Number(e.target.value))}
+              value={hoursInput}
+              onChange={(e) => { setHoursInput(e.target.value); setHoursError(''); }}
             />
+            {hoursError ? (
+              <p className="maintenance-form__error" role="alert">{hoursError}</p>
+            ) : null}
           </div>
 
           <fieldset className="edit-sheet__field">

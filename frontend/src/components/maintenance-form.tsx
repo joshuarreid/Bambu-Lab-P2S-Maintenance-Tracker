@@ -21,12 +21,14 @@ export function MaintenanceForm({ jobs, latestPrinterHours }: MaintenanceFormPro
   const [selectedJobId, setSelectedJobId] = useState('');
   const [category, setCategory] = useState<MaintenanceCategory>('ROUTINE');
   const [showIntervals, setShowIntervals] = useState(false);
-  const [printerHours, setPrinterHours] = useState(() => latestPrinterHours ?? 0);
+  const [hoursInput, setHoursInput] = useState(() => String(latestPrinterHours ?? 0));
+  const [hoursError, setHoursError] = useState('');
   const [notes, setNotes] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isHistorical, setIsHistorical] = useState(false);
 
   useEffect(() => {
-    setPrinterHours(latestPrinterHours ?? 0);
+    setHoursInput(String(latestPrinterHours ?? 0));
   }, [latestPrinterHours]);
 
   const selectedJob = useMemo(
@@ -34,7 +36,7 @@ export function MaintenanceForm({ jobs, latestPrinterHours }: MaintenanceFormPro
     [jobs, selectedJobId],
   );
 
-  const minHours = latestPrinterHours ?? 0;
+  const minHours = isHistorical ? 0 : (latestPrinterHours ?? 0);
 
   const canSubmit =
     selectedJobId.trim().length > 0 && !createRecordMutation.isPending;
@@ -92,11 +94,22 @@ export function MaintenanceForm({ jobs, latestPrinterHours }: MaintenanceFormPro
             return;
           }
 
+          const parsedHours = parseFloat(hoursInput);
+          if (Number.isNaN(parsedHours) || parsedHours < minHours) {
+            setHoursError(
+              isHistorical
+                ? 'Enter a valid number of hours (0 or more).'
+                : `Hours must be at least ${minHours} (current total).`,
+            );
+            return;
+          }
+
+          setHoursError('');
           setSuccessMessage('');
 
           try {
             await createRecordMutation.mutateAsync({
-              printerHours,
+              printerHours: parsedHours,
               maintenanceJobId: Number(selectedJobId),
               category,
               notes: notes.trim().length > 0 ? notes.trim() : null,
@@ -106,6 +119,7 @@ export function MaintenanceForm({ jobs, latestPrinterHours }: MaintenanceFormPro
             setSelectedJobId('');
             setCategory('ROUTINE');
             setNotes('');
+            setIsHistorical(false);
           } catch {
             return;
           }
@@ -116,26 +130,42 @@ export function MaintenanceForm({ jobs, latestPrinterHours }: MaintenanceFormPro
             Printer hours
           </label>
           <input
-            className="maintenance-form__input"
+            className={`maintenance-form__input${hoursError ? ' maintenance-form__input--invalid' : ''}`}
             id="printerHours"
-            inputMode="numeric"
-            max={9999}
-            min={minHours}
+            inputMode="decimal"
             name="printerHours"
-            step={0.1}
             type="number"
-            value={printerHours}
+            step={0.1}
+            min={0}
+            value={hoursInput}
             onChange={(event) => {
-              const val = Number(event.target.value);
-              setPrinterHours(val < minHours ? minHours : val);
+              setHoursInput(event.target.value);
+              setHoursError('');
             }}
           />
+          {hoursError ? (
+            <p className="maintenance-form__error" role="alert">{hoursError}</p>
+          ) : null}
           <div className="maintenance-form__context">
             <span className="maintenance-form__context-label">Current total hours</span>
             <span className="maintenance-form__context-value">
               {latestPrinterHours === null ? 'No history yet' : formatHours(latestPrinterHours)}
             </span>
           </div>
+          <label className="maintenance-form__historical-toggle">
+            <input
+              type="checkbox"
+              checked={isHistorical}
+              onChange={(e) => {
+                setIsHistorical(e.target.checked);
+                setHoursError('');
+                if (!e.target.checked) {
+                  setHoursInput(String(latestPrinterHours ?? 0));
+                }
+              }}
+            />
+            Historical entry — logging a past record
+          </label>
         </div>
 
         <div className="maintenance-form__group">

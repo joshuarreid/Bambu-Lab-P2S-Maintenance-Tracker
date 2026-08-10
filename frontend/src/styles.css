@@ -561,8 +561,6 @@ textarea {
 .history-table__cell--cat {
   text-align: center;
 }
-
-.history-table__badge {
   display: inline-grid;
   place-items: center;
   width: 22px;
@@ -580,28 +578,6 @@ textarea {
 .history-table__badge--error {
   background: rgba(177, 55, 45, 0.1);
   color: #b1372d;
-}
-
-.history-table__cell--action {
-  text-align: right;
-  padding-right: 8px;
-}
-
-.history-table__edit-btn {
-  background: none;
-  border: 0;
-  padding: 6px 8px;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #aaaaaa;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: color 120ms ease, background-color 120ms ease;
-}
-
-.history-table__edit-btn:hover {
-  color: #333333;
-  background: rgba(17, 17, 17, 0.06);
 }
 
 /* ── Edit sheet ──────────────────────────────────────────────── */
@@ -1082,35 +1058,41 @@ textarea {
 }
 
 .upcoming-widget__jobs li {
-  font-size: 0.85rem;
-  color: #5a5a5a;
   line-height: 1.45;
 }
 
-.upcoming-widget__jobs li::before {
-  content: '· ';
-  color: #aaaaaa;
-}
-
 .upcoming-widget__job-btn {
+  display: flex;
+  align-items: center;
+  width: calc(100% + 16px);
+  margin: 0 -8px;
   background: none;
   border: 0;
-  padding: 0;
-  margin: 0;
+  padding: 5px 8px;
   cursor: pointer;
   font: inherit;
-  font-size: inherit;
-  color: inherit;
+  font-size: 0.85rem;
+  color: #5a5a5a;
   text-align: left;
-  text-decoration: underline;
-  text-decoration-color: rgba(17, 17, 17, 0.2);
-  text-underline-offset: 2px;
-  transition: color 120ms ease, text-decoration-color 120ms ease;
+  border-radius: 8px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.upcoming-widget__job-btn::before {
+  content: '·';
+  color: #aaaaaa;
+  margin-right: 6px;
+  flex-shrink: 0;
+  transition: color 120ms ease;
 }
 
 .upcoming-widget__job-btn:hover {
-  color: #0a9f4b;
-  text-decoration-color: rgba(10, 159, 75, 0.5);
+  background: rgba(10, 159, 75, 0.07);
+  color: #0a8a40;
+}
+
+.upcoming-widget__job-btn:hover::before {
+  color: #0a8a40;
 }
 
 .upcoming-widget__no-history {
@@ -1149,6 +1131,11 @@ textarea {
   padding: 12px 14px;
   background: #fbfbfa;
   color: #191919;
+}
+
+.maintenance-form__input--invalid {
+  border-color: #b1372d;
+  background: rgba(177, 55, 45, 0.04);
 }
 
 .maintenance-form__input--textarea {
@@ -1194,6 +1181,65 @@ textarea {
   color: #8d5a00;
   font-size: 0.88rem;
   line-height: 1.4;
+}
+
+.maintenance-form__historical-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(17, 17, 17, 0.10);
+  border-radius: 12px;
+  background: #f7f7f5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444444;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 2px;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.maintenance-form__historical-toggle:has(input:checked) {
+  background: rgba(10, 159, 75, 0.06);
+  border-color: rgba(10, 159, 75, 0.3);
+  color: #0a6e34;
+}
+
+.maintenance-form__historical-toggle input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.18);
+  cursor: pointer;
+  transition: background-color 200ms ease;
+  order: 2;
+}
+
+.maintenance-form__historical-toggle input[type='checkbox']::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 200ms ease;
+}
+
+.maintenance-form__historical-toggle input[type='checkbox']:checked {
+  background: #0a9f4b;
+}
+
+.maintenance-form__historical-toggle input[type='checkbox']:checked::after {
+  transform: translateX(16px);
 }
 
 .maintenance-form__success {

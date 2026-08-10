@@ -27,7 +27,8 @@ function EditSheet({ record, jobOptions, onClose }: EditSheetProps) {
   const updateMutation = useUpdateMaintenanceRecord();
   const deleteMutation = useDeleteMaintenanceRecord();
 
-  const [printerHours, setPrinterHours] = useState(record.printerHours);
+  const [hoursInput, setHoursInput] = useState(String(record.printerHours));
+  const [hoursError, setHoursError] = useState('');
   const [jobId, setJobId] = useState(String(record.maintenanceJobId));
   const [category, setCategory] = useState<'ROUTINE' | 'ERROR'>(record.category);
   const [notes, setNotes] = useState(record.notes ?? '');
@@ -36,10 +37,16 @@ function EditSheet({ record, jobOptions, onClose }: EditSheetProps) {
   const isPending = updateMutation.isPending || deleteMutation.isPending;
 
   async function handleSave() {
+    const parsedHours = parseFloat(hoursInput);
+    if (Number.isNaN(parsedHours) || parsedHours < 0) {
+      setHoursError('Enter a valid number of hours (0 or more).');
+      return;
+    }
+    setHoursError('');
     await updateMutation.mutateAsync({
       id: record.id,
       input: {
-        printerHours,
+        printerHours: parsedHours,
         maintenanceJobId: Number(jobId),
         category,
         notes: notes.trim() || null,
@@ -78,13 +85,15 @@ function EditSheet({ record, jobOptions, onClose }: EditSheetProps) {
               className="edit-sheet__input"
               id="edit-hours"
               type="number"
-              inputMode="numeric"
+              inputMode="decimal"
               min={0}
-              max={9999}
               step={0.1}
-              value={printerHours}
-              onChange={(e) => setPrinterHours(Number(e.target.value))}
+              value={hoursInput}
+              onChange={(e) => { setHoursInput(e.target.value); setHoursError(''); }}
             />
+            {hoursError ? (
+              <p className="maintenance-form__error" role="alert">{hoursError}</p>
+            ) : null}
           </div>
 
           <div className="edit-sheet__field">
@@ -208,7 +217,6 @@ export function HistoryPage() {
                   <th scope="col">Job</th>
                   <th scope="col">Hours</th>
                   <th scope="col">Cat.</th>
-                  <th scope="col"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -234,16 +242,6 @@ export function HistoryPage() {
                       <span className={`history-table__badge history-table__badge--${record.category.toLowerCase()}`}>
                         {record.category === 'ROUTINE' ? 'R' : 'E'}
                       </span>
-                    </td>
-                    <td className="history-table__cell history-table__cell--action">
-                      <button
-                        className="history-table__edit-btn"
-                        type="button"
-                        aria-label={`Edit ${record.maintenanceJobName} record`}
-                        onClick={() => setEditing(record)}
-                      >
-                        ···
-                      </button>
                     </td>
                   </tr>
                 ))}
