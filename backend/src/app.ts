@@ -1,3 +1,5 @@
+import path from 'node:path';
+import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import type { AuthService } from './services/auth-service';
 import type { MaintenanceService } from './services/maintenance-service';
@@ -18,6 +20,24 @@ export function createApp(dependencies: AppDependencies) {
   });
 
   registerRoutes(app, dependencies);
+
+  // Serve the compiled frontend in production.
+  // The frontend dist is built to frontend/dist relative to the repo root,
+  // which sits two directories up from backend/dist/server.js at runtime.
+  if (process.env.NODE_ENV === 'production') {
+    const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+
+    app.register(fastifyStatic, {
+      root: frontendDist,
+      prefix: '/',
+      decorateReply: false,
+    });
+
+    // Fall back to index.html for all non-API routes (client-side routing).
+    app.setNotFoundHandler((_request, reply) => {
+      reply.sendFile('index.html', frontendDist);
+    });
+  }
 
   return app;
 }
